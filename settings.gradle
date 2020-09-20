@@ -1,0 +1,2 @@
+rootProject.name='My Application TrulaLa'
+include ':app'
