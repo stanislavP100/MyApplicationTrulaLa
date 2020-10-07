@@ -3,7 +3,6 @@ package com.example.myapplicationtrulala;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +12,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.InputStream;
-import java.net.URL;
+import java.util.ArrayList;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.NumberViewHolder> {
 
@@ -26,16 +24,18 @@ public class Adapter extends RecyclerView.Adapter<Adapter.NumberViewHolder> {
 
     private Context context;
 
-    private Bitmap bb;
+    private ArrayList<Bitmap> bb;
 
     private int mNumberItems;
 
+    private ArrayList<Product> products;
+
     private String [] strings;
 
-    public Adapter(Context context, String [] st, Bitmap image) {
-        mNumberItems = st.length;
+    public Adapter(Context context, ArrayList<Product> product, ArrayList <Bitmap> image) {
+        mNumberItems = product.size();
         this.context=context;
-        strings=st;
+        this.products=product;
         viewHolderCount = 0;
         bb=image;
     }
@@ -53,8 +53,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.NumberViewHolder> {
 
         viewHolderCount++;
 
-        System.out.println(viewHolderCount);
-
         return viewHolder;
     }
 
@@ -62,9 +60,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.NumberViewHolder> {
     @Override
     public void onBindViewHolder(NumberViewHolder holder, int position) {
 
-        Log.d(TAG, "#" + position);
-
-        holder.setDetails(strings, position, bb);
+        holder.setDetails(products, position,bb);
 
     }
 
@@ -86,15 +82,15 @@ public class Adapter extends RecyclerView.Adapter<Adapter.NumberViewHolder> {
         public NumberViewHolder(View itemView) {
             super(itemView);
 
-            imageView=(ImageView) itemView.findViewById(R.id.my_image);
+            imageView= itemView.findViewById(R.id.my_image);
 
-            viewHolderIndex = (TextView) itemView.findViewById(R.id.text_view_holder);
+            viewHolderIndex = itemView.findViewById(R.id.text_view_holder);
         }
 
 
-        void setDetails(String [] strings, int p, Bitmap img) {
-            viewHolderIndex.setText(strings[p]);
-            imageView.setImageBitmap(img);
+        void setDetails(ArrayList<Product> products, int p,ArrayList<Bitmap> img) {
+            viewHolderIndex.setText(products.get(p).getName());
+            imageView.setImageBitmap(img.get(p));
         }
 
 

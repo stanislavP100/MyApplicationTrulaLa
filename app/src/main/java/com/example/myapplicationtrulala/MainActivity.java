@@ -1,34 +1,26 @@
 package com.example.myapplicationtrulala;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private Adapter mAdapter;
 
-    private Bitmap bb;
+    private ArrayList <Bitmap> bb=new ArrayList<>();
 
     private RecyclerView mNumbersList;
 
@@ -39,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-          loadWeatherData(); //на first page не праює, до по цепочці все далі грузить а вигружать нема куди (мабуть)
+          loadWeatherData();
     }
 
 
@@ -74,16 +66,17 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public class WeaterQueryTask extends AsyncTask<String, Void, String[]> {
+    public class WeaterQueryTask extends AsyncTask<String, Void, ArrayList<Product> > {
 
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected ArrayList <Product> doInBackground(String... params) {
             /* If there's no zip code, there's nothing to look up. */
             if (params.length == 0) {
                 return null;
             }
 
+            ArrayList<Product> tt=null;
 
             URL weatherRequestUrl = NetworkUtils.buildUrl();
 
@@ -91,16 +84,39 @@ public class MainActivity extends AppCompatActivity {
                 String jsonWeatherResponse = NetworkUtils
                         .getResponseFromHttpUrl(weatherRequestUrl);
 
+               tt=OpenWeatherJsonUtils.getDetailsFromJson(jsonWeatherResponse);
 
 
-                String[] simpleJsonWeatherData= OpenWeatherJsonUtils
-                        .getSimpleWeatherStringsFromJson(MainActivity.this, jsonWeatherResponse);
+                Bitmap tmp, tmp2;
+
+                ArrayList <String> imageName=new ArrayList<>(17);
 
 
+                for( Product i : tt)
+                {
+                    String oo="https://chitadrita.herokuapp.com/get-image?image="+i.getImage();
+                    imageName.add(oo);;
+                }
 
-               bb=getBitmap("https://chitadrita.herokuapp.com/get-image?image=bol.jpeg");
 
-                return simpleJsonWeatherData;
+                for(String i : imageName){
+
+                    System.out.println(i);
+
+                   tmp=getBitmap(i);
+
+                   if(tmp==null)
+                       tmp=getBitmap("https://chitadrita.herokuapp.com/get-image?image=bol.jpeg");
+
+                    tmp2=Bitmap.createScaledBitmap(tmp,300,300,true);
+                    bb.add(tmp2);
+                }
+
+                System.out.println(tt.size()+" IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+
+
+            return tt;
+
 
 
             } catch (Exception e) {
@@ -111,17 +127,17 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-
-
         @Override
-        protected void onPostExecute(String[] strings) {
+        protected void onPostExecute(ArrayList<Product> product) {
 
-            mNumbersList = (RecyclerView) findViewById(R.id.rv_numbers);
+
+
+            mNumbersList = findViewById(R.id.rv_numbers);
 
             LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
             mNumbersList.setLayoutManager(layoutManager);
 
-            mAdapter = new Adapter(MainActivity.this, strings, bb);
+            mAdapter = new Adapter(MainActivity.this, product, bb);
             mNumbersList.setAdapter(mAdapter);
 
 
